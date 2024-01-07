@@ -1,16 +1,31 @@
-package Builder;
+package Entities;
+
 
 public class Laptop {
+    private String id;
     private String code;
     private String name;
     private String brand;
     private String processor;
     private String memory;
     private String storage;
-    private String unit;
     private int price;
 
     public Laptop() {
+    }
+
+    public Laptop(String code, String name, String brand, String processor, String memory, String storage, int price) {
+        this.code = code;
+        this.name = name;
+        this.brand = brand;
+        this.processor = processor;
+        this.memory = memory;
+        this.storage = storage;
+        this.price = price;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getCode() {
@@ -59,14 +74,6 @@ public class Laptop {
 
     public void setStorage(String storage) {
         this.storage = storage;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
     }
 
     public int getPrice() {
