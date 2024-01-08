@@ -4,7 +4,12 @@
  */
 package GUI;
 
+import Builder.LaptopBuilder;
+import Entities.Laptop;
+import Enum.LaptopOS;
+
 import Database.Connection;
+import Factory.LaptopFactory;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -19,6 +24,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -68,6 +74,7 @@ public class MainForm extends javax.swing.JFrame {
     public void initTable() {
         MongoCollection<Document> collection = laptopList();
         DefaultTableModel model = (DefaultTableModel) tblLaptop.getModel();
+        model.setRowCount(0);
 
         FindIterable<Document> documents = collection.find();
 
@@ -310,6 +317,7 @@ public class MainForm extends javax.swing.JFrame {
         btnAddOK.setText("OK");
         btnAddOK.setEnabled(false);
         btnAddOK.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddOKActionPerformed(evt);
             }
@@ -535,7 +543,6 @@ public class MainForm extends javax.swing.JFrame {
         jPanel1.setEnabled(true);
         txtCode.setEnabled(true);
         txtCode.setEditable(false);
-        txtCode.setText("");
         txtName.setEnabled(true);
         txtBrand.setEnabled(true);
         cbOS.setEnabled(true);
@@ -552,7 +559,6 @@ public class MainForm extends javax.swing.JFrame {
         jPanel1.setEnabled(true);
         txtCode.setEnabled(true);
         txtCode.setEditable(false);
-        txtCode.setText("");
         txtName.setEnabled(false);
         txtBrand.setEnabled(false);
         cbOS.setEnabled(false);
@@ -566,6 +572,37 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnAddOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddOKActionPerformed
+        String code = txtCode.getText();
+        String name = txtName.getText();
+        LaptopOS os = LaptopOS.valueOf(Objects.requireNonNull(cbOS.getSelectedItem()).toString());
+        String brand = txtBrand.getText();
+        String processor = Objects.requireNonNull(cbProcessor.getSelectedItem()).toString();
+        String memory = txtMemory.getText();
+        String storage = txtStorage.getText();
+        int price = Integer.parseInt(txtPrice.getText());
+
+        LaptopBuilder laptopBuilder = LaptopFactory.createLaptop(os);
+        Laptop laptop = laptopBuilder
+                .setCode(code).setName(name)
+                .setBrand(brand).setProcessor(processor)
+                .setMemory(memory).setStorage(storage)
+                .setPrice(price).build();
+
+        MongoCollection<Document> laptopCollection = Connection.getDatabase().getCollection("laptop");
+
+        Document laptopDocument = new Document()
+                .append("code", laptop.getCode())
+                .append("name", laptop.getName())
+                .append("brand", laptop.getBrand())
+                .append("processor", laptop.getProcessor())
+                .append("memory", laptop.getMemory())
+                .append("storage", laptop.getStorage())
+                .append("price", laptop.getPrice());
+
+        laptopCollection.insertOne(laptopDocument);
+
+        initTable();
+        clearState();
 
     }//GEN-LAST:event_btnAddOKActionPerformed
 
@@ -584,6 +621,29 @@ public class MainForm extends javax.swing.JFrame {
     private void cbOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbOSActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbOSActionPerformed
+
+    private void clearState() {
+        jPanel1.setEnabled(false);
+        txtCode.setEnabled(false);
+        txtCode.setText("");
+        txtName.setEnabled(false);
+        txtName.setText("");
+        cbOS.setSelectedIndex(0);
+        cbOS.setEnabled(false);
+        txtBrand.setEnabled(false);
+        txtBrand.setText("");
+        cbProcessor.setSelectedIndex(0);
+        cbProcessor.setEnabled(false);
+        txtMemory.setEnabled(false);
+        txtMemory.setText("");
+        txtStorage.setEnabled(false);
+        txtStorage.setText("");
+        txtPrice.setEnabled(false);
+        txtPrice.setText("");
+        btnAddOK.setEnabled(false);
+        btnUpdateOK.setEnabled(false);
+        btnDeleteOK.setEnabled(false);
+    }
 
     /**
      * @param args the command line arguments
