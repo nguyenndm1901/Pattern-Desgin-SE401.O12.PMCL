@@ -3,11 +3,10 @@ package Factory;
 import Builder.LaptopBuilder;
 import Entities.Laptop;
 
-public class WindowsLaptopCreator implements LaptopCreator {
+public class WindowsLaptopCreator {
 
-    @Override
-    public Laptop createLaptop() {
-        return new LaptopBuilder().build();
+    public LaptopBuilder createLaptop() {
+        return new LaptopBuilder();
         // return new LaptopBuilder()
         //      .setCode(code).setName(name)
         //      .setBrand(brand)

@@ -2,12 +2,12 @@ package Factory;
 
 import Builder.LaptopBuilder;
 import Entities.Laptop;
+import Enum.LaptopOS;
 
-public class MacOSLaptopCreator implements LaptopCreator {
+public class MacOSLaptopCreator {
 
-    @Override
-    public Laptop createLaptop() {
-        return new LaptopBuilder().build();
+    public LaptopBuilder createLaptop() {
+        return new LaptopBuilder();
         // return new LaptopBuilder()
         //      .setCode(code).setName(name)
         //      .setBrand(brand)

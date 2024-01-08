@@ -1,5 +1,6 @@
 package Factory;
 
+import Builder.LaptopBuilder;
 import Entities.Laptop;
 import Enum.LaptopOS;
 
@@ -8,7 +9,7 @@ public class LaptopFactory {
 
     }
 
-    public static Laptop createLaptop(LaptopOS os) {
+    public static LaptopBuilder createLaptop(LaptopOS os) {
         switch (os) {
             case Windows:
                 return new WindowsLaptopCreator().createLaptop();

@@ -14,7 +14,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -28,6 +32,7 @@ public class MainForm extends javax.swing.JFrame {
     public MainForm() {
         initComponents();
         initTable();
+        initComboBox();
     }
 
     public MongoCollection<Document> laptopList() {
@@ -77,6 +82,58 @@ public class MainForm extends javax.swing.JFrame {
             model.addRow(row);
         }
     }
+    private void initComboBox() {
+        cbOS.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    updateProcessorComboBox((String) cbOS.getSelectedItem());
+                }
+            }
+        });
+    }
+
+    private void updateProcessorComboBox(String selectedOS) {
+        cbProcessor.removeAllItems();
+        MongoCollection<Document> collection = Connection.getDatabase().getCollection("part");
+        FindIterable<Document> documents = collection.find(new Document("os", selectedOS));
+        MongoCursor<Document> cursor = documents.iterator();
+        Set<String> uniqueProcessorValues = new HashSet<>();
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            if (document.containsKey("name")) {
+                Object processorValue = document.get("name");
+                uniqueProcessorValues.add(String.valueOf(processorValue));
+            }
+        }
+        for (String value : uniqueProcessorValues) {
+            cbProcessor.addItem(value);
+        }
+    }
+
+//    private void initComboBox() {
+//        Set<String> uniqueFieldValues = getUniqueFiledValues("part", "name");
+//
+//        for (String value : uniqueFieldValues) {
+//            cbProcessor.addItem(value);
+//        }
+//    }
+
+//    private Set<String> getUniqueFiledValues(String collectionName, String fieldName) {
+//        Set<String> uniqueValues = new HashSet<>();
+//        MongoCollection<Document> collection = Connection.getDatabase().getCollection(collectionName);
+//        FindIterable<Document> documents = collection.find();
+//        MongoCursor<Document> cursor = documents.iterator();
+//
+//        while (cursor.hasNext()) {
+//            Document document = cursor.next();
+//            if (document.containsKey(fieldName)) {
+//                Object fieldValue = document.get(fieldName);
+//                uniqueValues.add(String.valueOf(fieldValue));
+//            }
+//        }
+//        return uniqueValues;
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -107,13 +164,15 @@ public class MainForm extends javax.swing.JFrame {
         txtName = new javax.swing.JTextField();
         txtCode = new javax.swing.JTextField();
         txtBrand = new javax.swing.JTextField();
-        txtProcessor = new javax.swing.JTextField();
         txtMemory = new javax.swing.JTextField();
         txtStorage = new javax.swing.JTextField();
         txtPrice = new javax.swing.JTextField();
         btnAddOK = new javax.swing.JButton();
         btnUpdateOK = new javax.swing.JButton();
         btnDeleteOK = new javax.swing.JButton();
+        cbProcessor = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
+        cbOS = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
         menuLaptop = new javax.swing.JMenu();
         menuReceipt = new javax.swing.JMenu();
@@ -209,8 +268,6 @@ public class MainForm extends javax.swing.JFrame {
 
         txtBrand.setEnabled(false);
 
-        txtProcessor.setEnabled(false);
-
         txtMemory.setEnabled(false);
 
         txtStorage.setEnabled(false);
@@ -241,6 +298,17 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        cbProcessor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {  }));
+        cbProcessor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbProcessorActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("OS");
+
+        cbOS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Windows", "MacOS" }));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -262,7 +330,8 @@ public class MainForm extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addComponent(jLabel6)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel2))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel8))
                         .addGap(32, 32, 32)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
@@ -270,8 +339,9 @@ public class MainForm extends javax.swing.JFrame {
                             .addComponent(txtStorage)
                             .addComponent(txtMemory)
                             .addComponent(txtBrand, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
-                            .addComponent(txtProcessor)
-                            .addComponent(txtCode, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE))))
+                            .addComponent(txtCode, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
+                            .addComponent(cbProcessor, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cbOS, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -285,32 +355,36 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(cbOS, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(txtProcessor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(cbProcessor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtMemory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(txtStorage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAddOK)
                     .addComponent(btnUpdateOK)
                     .addComponent(btnDeleteOK))
-                .addContainerGap(48, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         menuLaptop.setText("Laptop");
@@ -402,7 +476,7 @@ public class MainForm extends javax.swing.JFrame {
         txtCode.setEditable(false);
         txtName.setEnabled(true);
         txtBrand.setEnabled(true);
-        txtProcessor.setEnabled(true);
+        cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
         txtPrice.setEnabled(true);
@@ -422,7 +496,7 @@ public class MainForm extends javax.swing.JFrame {
         txtCode.setEditable(false);
         txtName.setEnabled(true);
         txtBrand.setEnabled(true);
-        txtProcessor.setEnabled(true);
+        cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
         txtPrice.setEnabled(true);
@@ -437,7 +511,7 @@ public class MainForm extends javax.swing.JFrame {
         txtCode.setEditable(false);
         txtName.setEnabled(false);
         txtBrand.setEnabled(false);
-        txtProcessor.setEnabled(false);
+        cbProcessor.setEnabled(false);
         txtMemory.setEnabled(false);
         txtStorage.setEnabled(false);
         txtPrice.setEnabled(false);
@@ -457,6 +531,10 @@ public class MainForm extends javax.swing.JFrame {
     private void btnDeleteOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOKActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnDeleteOKActionPerformed
+
+    private void cbProcessorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProcessorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbProcessorActionPerformed
 
     /**
      * @param args the command line arguments
@@ -502,6 +580,8 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JButton btnUpdateOK;
+    private javax.swing.JComboBox<String> cbOS;
+    private javax.swing.JComboBox<String> cbProcessor;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -509,6 +589,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -522,7 +603,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JTextField txtMemory;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtPrice;
-    private javax.swing.JTextField txtProcessor;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStorage;
     // End of variables declaration//GEN-END:variables
