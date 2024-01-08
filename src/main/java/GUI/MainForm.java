@@ -13,6 +13,8 @@ import Factory.LaptopFactory;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 
 import javax.swing.*;
@@ -532,6 +534,8 @@ public class MainForm extends javax.swing.JFrame {
         btnAddOK.setEnabled(true);
         btnUpdateOK.setEnabled(false);
         btnDeleteOK.setEnabled(false);
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
         String code;
         do {
             code = randomCode();
@@ -553,6 +557,8 @@ public class MainForm extends javax.swing.JFrame {
         btnAddOK.setEnabled(false);
         btnUpdateOK.setEnabled(true);
         btnDeleteOK.setEnabled(false);
+        btnAdd.setEnabled(false);
+        btnDelete.setEnabled(false);
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -569,6 +575,8 @@ public class MainForm extends javax.swing.JFrame {
         btnAddOK.setEnabled(false);
         btnUpdateOK.setEnabled(false);
         btnDeleteOK.setEnabled(true);
+        btnAdd.setEnabled(false);
+        btnUpdate.setEnabled(false);
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnAddOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddOKActionPerformed
@@ -607,11 +615,48 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddOKActionPerformed
 
     private void btnUpdateOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateOKActionPerformed
-        // TODO add your handling code here:
+        String code = txtCode.getText();
+        String name = txtName.getText();
+        LaptopOS os = LaptopOS.valueOf(Objects.requireNonNull(cbOS.getSelectedItem()).toString());
+        String brand = txtBrand.getText();
+        String processor = Objects.requireNonNull(cbProcessor.getSelectedItem()).toString();
+        String memory = txtMemory.getText();
+        String storage = txtStorage.getText();
+        int price = Integer.parseInt(txtPrice.getText());
+
+        LaptopBuilder laptopBuilder = LaptopFactory.createLaptop(os);
+        Laptop laptop = laptopBuilder
+                .setCode(code).setName(name)
+                .setBrand(brand).setProcessor(processor)
+                .setMemory(memory).setStorage(storage)
+                .setPrice(price).build();
+
+        MongoCollection<Document> laptopCollection = Connection.getDatabase().getCollection("laptop");
+
+        Document laptopDocument = new Document()
+                .append("code", laptop.getCode())
+                .append("name", laptop.getName())
+                .append("brand", laptop.getBrand())
+                .append("processor", laptop.getProcessor())
+                .append("memory", laptop.getMemory())
+                .append("storage", laptop.getStorage())
+                .append("price", laptop.getPrice());
+
+        laptopCollection.replaceOne(Filters.eq("code", laptop.getCode()), laptopDocument, new UpdateOptions().upsert(true));
+
+        initTable();
+        clearState();
     }//GEN-LAST:event_btnUpdateOKActionPerformed
 
     private void btnDeleteOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteOKActionPerformed
-        // TODO add your handling code here:
+        String code = txtCode.getText();
+
+        MongoCollection<Document> collection = Connection.getDatabase().getCollection("laptop");
+
+        collection.deleteOne(Filters.eq("code", code));
+
+        initTable();
+        clearState();
     }//GEN-LAST:event_btnDeleteOKActionPerformed
 
     private void cbProcessorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProcessorActionPerformed
@@ -643,6 +688,9 @@ public class MainForm extends javax.swing.JFrame {
         btnAddOK.setEnabled(false);
         btnUpdateOK.setEnabled(false);
         btnDeleteOK.setEnabled(false);
+        btnAdd.setEnabled(true);
+        btnUpdate.setEnabled(true);
+        btnDelete.setEnabled(true);
     }
 
     /**
