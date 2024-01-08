@@ -50,9 +50,8 @@ public class MainForm extends javax.swing.JFrame {
         return randomCode.toString();
     }
 
-    private boolean check() {
+    private boolean check(String code) {
         MongoCollection<Document> collection = laptopList();
-        String code = randomCode();
         Document document = new Document("code", code);
         try (MongoCursor<Document> cursor = collection.find(document).iterator()) {
             return cursor.hasNext();
@@ -174,8 +173,18 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         btnUpdate.setText("Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         jPanel1.setEnabled(false);
         jPanel1.setEnabled(false);
@@ -209,7 +218,7 @@ public class MainForm extends javax.swing.JFrame {
         txtPrice.setEnabled(false);
 
         btnAddOK.setText("OK");
-        btnAddOK.setVisible(false);
+        btnAddOK.setEnabled(false);
         btnAddOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddOKActionPerformed(evt);
@@ -217,7 +226,7 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         btnUpdateOK.setText("OK");
-        btnUpdateOK.setVisible(false);
+        btnUpdateOK.setEnabled(false);
         btnUpdateOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateOKActionPerformed(evt);
@@ -225,7 +234,7 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         btnDeleteOK.setText("OK");
-        btnDeleteOK.setVisible(false);
+        btnDeleteOK.setEnabled(false);
         btnDeleteOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDeleteOKActionPerformed(evt);
@@ -240,11 +249,11 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnAddOK)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnUpdateOK)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDeleteOK))
+                        .addComponent(btnAddOK, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(35, 35, 35)
+                        .addComponent(btnUpdateOK, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnDeleteOK, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -323,12 +332,12 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(layout.createSequentialGroup()
                             .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(18, 18, 18)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(18, 18, 18)
+                            .addGap(35, 35, 35)
                             .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createSequentialGroup()
                             .addComponent(lblSearch)
@@ -397,11 +406,48 @@ public class MainForm extends javax.swing.JFrame {
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
         txtPrice.setEnabled(true);
-        btnAddOK.setVisible(true);
+        btnAddOK.setEnabled(true);
+        btnUpdateOK.setEnabled(false);
+        btnDeleteOK.setEnabled(false);
+        String code;
+        do {
+            code = randomCode();
+        } while (check(code));
+        txtCode.setText(code);
     }//GEN-LAST:event_btnAddActionPerformed
 
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        jPanel1.setEnabled(true);
+        txtCode.setEnabled(true);
+        txtCode.setEditable(false);
+        txtName.setEnabled(true);
+        txtBrand.setEnabled(true);
+        txtProcessor.setEnabled(true);
+        txtMemory.setEnabled(true);
+        txtStorage.setEnabled(true);
+        txtPrice.setEnabled(true);
+        btnAddOK.setEnabled(false);
+        btnUpdateOK.setEnabled(true);
+        btnDeleteOK.setEnabled(false);
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        jPanel1.setEnabled(true);
+        txtCode.setEnabled(true);
+        txtCode.setEditable(false);
+        txtName.setEnabled(false);
+        txtBrand.setEnabled(false);
+        txtProcessor.setEnabled(false);
+        txtMemory.setEnabled(false);
+        txtStorage.setEnabled(false);
+        txtPrice.setEnabled(false);
+        btnAddOK.setEnabled(false);
+        btnUpdateOK.setEnabled(false);
+        btnDeleteOK.setEnabled(true);
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
     private void btnAddOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddOKActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_btnAddOKActionPerformed
 
     private void btnUpdateOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateOKActionPerformed
