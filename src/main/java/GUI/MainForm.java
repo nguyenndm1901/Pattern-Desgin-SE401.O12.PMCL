@@ -11,6 +11,8 @@ import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -81,7 +83,32 @@ public class MainForm extends javax.swing.JFrame {
             };
             model.addRow(row);
         }
+
+        tblLaptop.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int selectedRow = tblLaptop.getSelectedRow();
+                    if (selectedRow != -1) {
+                        populateFieldsFromSelectedRow(selectedRow);
+                    }
+                }
+            }
+        });
     }
+
+    private void populateFieldsFromSelectedRow(int selectedRow) {
+        DefaultTableModel model = (DefaultTableModel) tblLaptop.getModel();
+        txtCode.setText(model.getValueAt(selectedRow,0).toString());
+        txtName.setText(model.getValueAt(selectedRow,1).toString());
+        txtBrand.setText(model.getValueAt(selectedRow,2).toString());
+        cbOS.setSelectedItem(determineOSFromProcessor(model.getValueAt(selectedRow,3).toString()));
+        cbProcessor.setSelectedItem(model.getValueAt(selectedRow,3).toString());
+        txtMemory.setText(model.getValueAt(selectedRow,4).toString());
+        txtStorage.setText(model.getValueAt(selectedRow,5).toString());
+        txtPrice.setText(model.getValueAt(selectedRow,6).toString());
+    }
+
     private void initComboBox() {
         cbOS.addItemListener(new ItemListener() {
             @Override
@@ -109,6 +136,12 @@ public class MainForm extends javax.swing.JFrame {
         for (String value : uniqueProcessorValues) {
             cbProcessor.addItem(value);
         }
+    }
+
+    private String determineOSFromProcessor(String processor) {
+        if (processor.contains("Intel") || processor.contains("AMD")) return "Windows";
+        else if (processor.contains("Apple")) return "MacOS";
+        else return "";
     }
 
 //    private void initComboBox() {
@@ -299,6 +332,7 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         cbProcessor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {  }));
+        cbProcessor.setEnabled(false);
         cbProcessor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbProcessorActionPerformed(evt);
@@ -308,6 +342,12 @@ public class MainForm extends javax.swing.JFrame {
         jLabel8.setText("OS");
 
         cbOS.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Windows", "MacOS" }));
+        cbOS.setEnabled(false);
+        cbOS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbOSActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -476,6 +516,7 @@ public class MainForm extends javax.swing.JFrame {
         txtCode.setEditable(false);
         txtName.setEnabled(true);
         txtBrand.setEnabled(true);
+        cbOS.setEnabled(true);
         cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
@@ -494,8 +535,10 @@ public class MainForm extends javax.swing.JFrame {
         jPanel1.setEnabled(true);
         txtCode.setEnabled(true);
         txtCode.setEditable(false);
+        txtCode.setText("");
         txtName.setEnabled(true);
         txtBrand.setEnabled(true);
+        cbOS.setEnabled(true);
         cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
@@ -509,8 +552,10 @@ public class MainForm extends javax.swing.JFrame {
         jPanel1.setEnabled(true);
         txtCode.setEnabled(true);
         txtCode.setEditable(false);
+        txtCode.setText("");
         txtName.setEnabled(false);
         txtBrand.setEnabled(false);
+        cbOS.setEnabled(false);
         cbProcessor.setEnabled(false);
         txtMemory.setEnabled(false);
         txtStorage.setEnabled(false);
@@ -535,6 +580,10 @@ public class MainForm extends javax.swing.JFrame {
     private void cbProcessorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProcessorActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbProcessorActionPerformed
+
+    private void cbOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbOSActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbOSActionPerformed
 
     /**
      * @param args the command line arguments
