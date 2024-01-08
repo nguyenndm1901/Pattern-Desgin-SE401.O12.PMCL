@@ -4,11 +4,6 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="menuLaptop">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Laptop"/>
-          </Properties>
-        </Menu>
         <Menu class="javax.swing.JMenu" name="menuReceipt">
           <Properties>
             <Property name="text" type="java.lang.String" value="Receipt"/>

@@ -216,7 +216,6 @@ public class LaptopForm extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         cbOS = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
-        menuLaptop = new javax.swing.JMenu();
         menuReceipt = new javax.swing.JMenu();
         menuStatistic = new javax.swing.JMenu();
 
@@ -435,9 +434,6 @@ public class LaptopForm extends javax.swing.JFrame {
                     .addComponent(btnDeleteOK))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
-
-        menuLaptop.setText("Laptop");
-        jMenuBar1.add(menuLaptop);
 
         menuReceipt.setText("Receipt");
         jMenuBar1.add(menuReceipt);
@@ -750,7 +746,6 @@ public class LaptopForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblSearch;
-    private javax.swing.JMenu menuLaptop;
     private javax.swing.JMenu menuReceipt;
     private javax.swing.JMenu menuStatistic;
     private javax.swing.JTable tblLaptop;
