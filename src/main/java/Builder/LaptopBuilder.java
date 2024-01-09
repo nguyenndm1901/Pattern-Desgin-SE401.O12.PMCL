@@ -10,6 +10,7 @@ public class LaptopBuilder implements ILaptopBuilder {
     private String processor;
     private String memory;
     private String storage;
+    private int warranty;
     private int price;
 
     private Laptop laptop;
@@ -51,6 +52,12 @@ public class LaptopBuilder implements ILaptopBuilder {
     }
 
     @Override
+    public ILaptopBuilder setWarranty(int warranty) {
+        this.warranty = warranty;
+        return this;
+    }
+
+    @Override
     public ILaptopBuilder setPrice(int price) {
         this.price = price;
         return this;
@@ -58,6 +65,6 @@ public class LaptopBuilder implements ILaptopBuilder {
 
     @Override
     public Laptop build() {
-        return new Laptop(code, name, brand, processor, memory, storage, price);
+        return new Laptop(code, name, brand, processor, memory, storage, warranty, price);
     }
 }

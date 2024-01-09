@@ -1,7 +1,9 @@
 package Entities;
 
 
-public class Laptop {
+import Decorator.ILaptopDecorator;
+
+public class Laptop implements ILaptopDecorator {
     private String id;
     private String code;
     private String name;
@@ -9,18 +11,20 @@ public class Laptop {
     private String processor;
     private String memory;
     private String storage;
+    private int warranty;
     private int price;
 
     public Laptop() {
     }
 
-    public Laptop(String code, String name, String brand, String processor, String memory, String storage, int price) {
+    public Laptop(String code, String name, String brand, String processor, String memory, String storage, int warranty, int price) {
         this.code = code;
         this.name = name;
         this.brand = brand;
         this.processor = processor;
         this.memory = memory;
         this.storage = storage;
+        this.warranty = warranty;
         this.price = price;
     }
 
@@ -76,6 +80,16 @@ public class Laptop {
         this.storage = storage;
     }
 
+    @Override
+    public int getWarranty() {
+        return warranty;
+    }
+
+    public void setWarranty(int warranty) {
+        this.warranty = warranty;
+    }
+
+    @Override
     public int getPrice() {
         return price;
     }

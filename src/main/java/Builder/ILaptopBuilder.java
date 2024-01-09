@@ -10,6 +10,7 @@ public interface ILaptopBuilder {
     ILaptopBuilder setProcessor(String processor);
     ILaptopBuilder setMemory(String memory);
     ILaptopBuilder setStorage(String storage);
+    ILaptopBuilder setWarranty(int warranty);
     ILaptopBuilder setPrice(int price);
 
     Laptop build();

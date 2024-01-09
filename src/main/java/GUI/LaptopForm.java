@@ -88,6 +88,7 @@ public class LaptopForm extends javax.swing.JFrame {
                     document.getString("processor"),
                     document.getString("memory"),
                     document.getString("storage"),
+                    document.getInteger("warranty"),
                     document.getInteger("price"),
             };
             model.addRow(row);
@@ -115,7 +116,8 @@ public class LaptopForm extends javax.swing.JFrame {
         cbProcessor.setSelectedItem(model.getValueAt(selectedRow,3).toString());
         txtMemory.setText(model.getValueAt(selectedRow,4).toString());
         txtStorage.setText(model.getValueAt(selectedRow,5).toString());
-        txtPrice.setText(model.getValueAt(selectedRow,6).toString());
+        txtWarranty.setText(model.getValueAt(selectedRow,6).toString());
+        txtPrice.setText(model.getValueAt(selectedRow,7).toString());
     }
 
     private void initComboBox() {
@@ -215,6 +217,8 @@ public class LaptopForm extends javax.swing.JFrame {
         cbProcessor = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
         cbOS = new javax.swing.JComboBox<>();
+        jLabel9 = new javax.swing.JLabel();
+        txtWarranty = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         menuReceipt = new javax.swing.JMenu();
         menuStatistic = new javax.swing.JMenu();
@@ -226,11 +230,11 @@ public class LaptopForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Code", "Name", "Brand", "Processor", "Memory", "Storage", "Price"
+                "Code", "Name", "Brand", "Processor", "Memory", "Storage", "Warranty", "Price"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false
@@ -304,18 +308,25 @@ public class LaptopForm extends javax.swing.JFrame {
         jLabel7.setText("Price:");
 
         txtName.setEnabled(false);
+        txtName.setEnabled(false);
 
+        txtCode.setEnabled(false);
         txtCode.setEnabled(false);
 
         txtBrand.setEnabled(false);
+        txtBrand.setEnabled(false);
 
+        txtMemory.setEnabled(false);
         txtMemory.setEnabled(false);
 
         txtStorage.setEnabled(false);
+        txtStorage.setEnabled(false);
 
+        txtPrice.setEnabled(false);
         txtPrice.setEnabled(false);
 
         btnAddOK.setText("OK");
+        btnAddOK.setEnabled(false);
         btnAddOK.setEnabled(false);
         btnAddOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -325,6 +336,7 @@ public class LaptopForm extends javax.swing.JFrame {
 
         btnUpdateOK.setText("OK");
         btnUpdateOK.setEnabled(false);
+        btnUpdateOK.setEnabled(false);
         btnUpdateOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateOKActionPerformed(evt);
@@ -332,6 +344,7 @@ public class LaptopForm extends javax.swing.JFrame {
         });
 
         btnDeleteOK.setText("OK");
+        btnDeleteOK.setEnabled(false);
         btnDeleteOK.setEnabled(false);
         btnDeleteOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -357,6 +370,10 @@ public class LaptopForm extends javax.swing.JFrame {
             }
         });
 
+        jLabel9.setText("Warranty:");
+
+        txtWarranty.setEnabled(false);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -379,7 +396,8 @@ public class LaptopForm extends javax.swing.JFrame {
                             .addComponent(jLabel6)
                             .addComponent(jLabel7)
                             .addComponent(jLabel2)
-                            .addComponent(jLabel8))
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9))
                         .addGap(32, 32, 32)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
@@ -389,7 +407,8 @@ public class LaptopForm extends javax.swing.JFrame {
                             .addComponent(txtBrand, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
                             .addComponent(txtCode, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
                             .addComponent(cbProcessor, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cbOS, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(cbOS, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtWarranty))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -425,6 +444,10 @@ public class LaptopForm extends javax.swing.JFrame {
                     .addComponent(txtStorage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtWarranty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
@@ -432,7 +455,7 @@ public class LaptopForm extends javax.swing.JFrame {
                     .addComponent(btnAddOK)
                     .addComponent(btnUpdateOK)
                     .addComponent(btnDeleteOK))
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         menuReceipt.setText("Receipt");
@@ -525,6 +548,7 @@ public class LaptopForm extends javax.swing.JFrame {
         cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
+        txtWarranty.setEnabled(true);
         txtPrice.setEnabled(true);
         btnAddOK.setEnabled(true);
         btnUpdateOK.setEnabled(false);
@@ -548,6 +572,7 @@ public class LaptopForm extends javax.swing.JFrame {
         cbProcessor.setEnabled(true);
         txtMemory.setEnabled(true);
         txtStorage.setEnabled(true);
+        txtWarranty.setEnabled(true);
         txtPrice.setEnabled(true);
         btnAddOK.setEnabled(false);
         btnUpdateOK.setEnabled(true);
@@ -566,6 +591,7 @@ public class LaptopForm extends javax.swing.JFrame {
         cbProcessor.setEnabled(false);
         txtMemory.setEnabled(false);
         txtStorage.setEnabled(false);
+        txtWarranty.setEnabled(false);
         txtPrice.setEnabled(false);
         btnAddOK.setEnabled(false);
         btnUpdateOK.setEnabled(false);
@@ -580,8 +606,11 @@ public class LaptopForm extends javax.swing.JFrame {
         LaptopOS os = LaptopOS.valueOf(Objects.requireNonNull(cbOS.getSelectedItem()).toString());
         String brand = txtBrand.getText();
         String processor = Objects.requireNonNull(cbProcessor.getSelectedItem()).toString();
+        if (!txtMemory.getText().contains("GB")) txtMemory.setText(txtMemory.getText().trim() + "GB");
         String memory = txtMemory.getText();
+        if (!txtStorage.getText().contains("GB")) txtStorage.setText(txtStorage.getText().trim() + "GB");
         String storage = txtStorage.getText();
+        int warranty = Integer.parseInt(txtWarranty.getText());
         int price = Integer.parseInt(txtPrice.getText());
 
         LaptopBuilder laptopBuilder = LaptopFactory.createLaptop(os);
@@ -589,7 +618,8 @@ public class LaptopForm extends javax.swing.JFrame {
                 .setCode(code).setName(name)
                 .setBrand(brand).setProcessor(processor)
                 .setMemory(memory).setStorage(storage)
-                .setPrice(price).build();
+                .setWarranty(warranty).setPrice(price)
+                .build();
 
         MongoCollection<Document> laptopCollection = Connection.getDatabase().getCollection("laptop");
 
@@ -600,6 +630,7 @@ public class LaptopForm extends javax.swing.JFrame {
                 .append("processor", laptop.getProcessor())
                 .append("memory", laptop.getMemory())
                 .append("storage", laptop.getStorage())
+                .append("warranty", laptop.getWarranty())
                 .append("price", laptop.getPrice());
 
         laptopCollection.insertOne(laptopDocument);
@@ -617,6 +648,7 @@ public class LaptopForm extends javax.swing.JFrame {
         String processor = Objects.requireNonNull(cbProcessor.getSelectedItem()).toString();
         String memory = txtMemory.getText();
         String storage = txtStorage.getText();
+        int warranty = Integer.parseInt(txtWarranty.getText());
         int price = Integer.parseInt(txtPrice.getText());
 
         LaptopBuilder laptopBuilder = LaptopFactory.createLaptop(os);
@@ -624,7 +656,8 @@ public class LaptopForm extends javax.swing.JFrame {
                 .setCode(code).setName(name)
                 .setBrand(brand).setProcessor(processor)
                 .setMemory(memory).setStorage(storage)
-                .setPrice(price).build();
+                .setWarranty(warranty).setPrice(price)
+                .build();
 
         MongoCollection<Document> laptopCollection = Connection.getDatabase().getCollection("laptop");
 
@@ -635,6 +668,7 @@ public class LaptopForm extends javax.swing.JFrame {
                 .append("processor", laptop.getProcessor())
                 .append("memory", laptop.getMemory())
                 .append("storage", laptop.getStorage())
+                .append("warranty", laptop.getWarranty())
                 .append("price", laptop.getPrice());
 
         laptopCollection.replaceOne(Filters.eq("code", laptop.getCode()), laptopDocument, new UpdateOptions().upsert(true));
@@ -678,6 +712,8 @@ public class LaptopForm extends javax.swing.JFrame {
         txtMemory.setText("");
         txtStorage.setEnabled(false);
         txtStorage.setText("");
+        txtWarranty.setEnabled(false);
+        txtWarranty.setText("");
         txtPrice.setEnabled(false);
         txtPrice.setText("");
         btnAddOK.setEnabled(false);
@@ -742,6 +778,7 @@ public class LaptopForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -756,5 +793,6 @@ public class LaptopForm extends javax.swing.JFrame {
     private javax.swing.JTextField txtPrice;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtStorage;
+    private javax.swing.JTextField txtWarranty;
     // End of variables declaration//GEN-END:variables
 }

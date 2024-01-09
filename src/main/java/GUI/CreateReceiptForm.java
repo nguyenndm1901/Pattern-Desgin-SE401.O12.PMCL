@@ -15,6 +15,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -110,6 +112,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                     document.get("processor").toString(),
                     document.get("memory").toString(),
                     document.get("storage").toString(),
+                    Integer.parseInt(document.get("warranty").toString()),
                     Integer.parseInt(document.get("price").toString())
             );
             cbLaptop.addItem(laptop);
@@ -155,11 +158,6 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtQuantity = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtUnitPrice = new javax.swing.JTextField();
-        jLabel9 = new javax.swing.JLabel();
-        txtUnit = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        txtWarranty = new javax.swing.JTextField();
-        jLabel11 = new javax.swing.JLabel();
         btnAdd = new javax.swing.JButton();
         btnCheckout = new javax.swing.JButton();
         btnNew = new javax.swing.JButton();
@@ -170,6 +168,9 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtTotal = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         cbService = new javax.swing.JComboBox<>();
+        txtWarranty = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -214,24 +215,13 @@ public class CreateReceiptForm extends javax.swing.JFrame {
 
         jLabel7.setText("Qt:");
 
+        txtQuantity.setText("1");
         txtQuantity.setEnabled(false);
 
         jLabel8.setText("Unit Price:");
 
         txtUnitPrice.setEditable(false);
         txtUnitPrice.setEnabled(false);
-
-        jLabel9.setText("Unit:");
-
-        txtUnit.setEditable(false);
-        txtUnit.setEnabled(false);
-
-        jLabel10.setText("Warranty:");
-
-        txtWarranty.setEditable(false);
-        txtWarranty.setEnabled(false);
-
-        jLabel11.setText("months");
 
         btnAdd.setText("Add to Cart");
         btnAdd.setEnabled(false);
@@ -311,6 +301,12 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             }
         });
 
+        txtWarranty.setEnabled(false);
+
+        jLabel14.setText("Warranty:");
+
+        jLabel9.setText("months");
+
         jMenu1.setText("Laptop");
         jMenuBar1.add(jMenu1);
 
@@ -328,12 +324,12 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel9)
                             .addComponent(jLabel1)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel6)
-                            .addComponent(jLabel8))
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel14))
                         .addGap(26, 26, 26)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -354,26 +350,20 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                                 .addComponent(jLabel7)
                                 .addGap(18, 18, 18)
                                 .addComponent(txtQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, 397, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtUnitPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(txtWarranty)
+                                    .addComponent(txtUnitPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addGap(54, 54, 54)
                                         .addComponent(jLabel13)
-                                        .addGap(18, 18, 18))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel10)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(cbService, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(txtWarranty, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jLabel11))
-                                    .addComponent(cbService, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(txtCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, 397, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel9)))))
                         .addGap(18, 18, 18)
                         .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -396,11 +386,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(48, 48, 48)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30)
-                        .addComponent(btnCheckout, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -436,15 +422,15 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                             .addComponent(jLabel13)
                             .addComponent(cbService, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel8))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel9))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtWarranty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel11)
-                                .addComponent(jLabel10))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtWarranty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel14)
+                            .addComponent(jLabel9)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(30, 30, 30)
+                        .addComponent(btnCheckout, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -470,7 +456,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         cbService.setEnabled(true);
         txtQuantity.setEnabled(true);
         txtUnitPrice.setEnabled(true);
-        txtUnit.setEnabled(true);
+        txtWarranty.setEnabled(true);
         tblCart.setEnabled(true);
         setCode();
         setPurchaseDate();
@@ -493,7 +479,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         cbService.setEnabled(false);
         txtQuantity.setEnabled(false);
         txtUnitPrice.setEnabled(false);
-        txtUnit.setEnabled(false);
+        txtWarranty.setEnabled(false);
         tblCart.setEnabled(false);
     }//GEN-LAST:event_btnCheckoutActionPerformed
 
@@ -512,6 +498,8 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         Laptop selectedLaptop = (Laptop) cbLaptop.getSelectedItem();
         String name = selectedLaptop.getName();
         String code = selectedLaptop.getCode();
+        txtUnitPrice.setText(String.valueOf(selectedLaptop.getPrice()));
+        txtWarranty.setText(String.valueOf(selectedLaptop.getWarranty()));
         System.out.println(code);
     }//GEN-LAST:event_cbLaptopActionPerformed
 
@@ -566,10 +554,9 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private javax.swing.JComboBox<Service> cbService;
     private javax.swing.JComboBox<Staff> cbStaff;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -589,7 +576,6 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private javax.swing.JTextField txtPurchaseDate;
     private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtTotal;
-    private javax.swing.JTextField txtUnit;
     private javax.swing.JTextField txtUnitPrice;
     private javax.swing.JTextField txtWarranty;
     // End of variables declaration//GEN-END:variables
