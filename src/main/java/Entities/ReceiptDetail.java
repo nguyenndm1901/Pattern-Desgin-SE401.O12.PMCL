@@ -1,9 +1,12 @@
 package Entities;
 
+import java.util.List;
+
 public class ReceiptDetail {
     private String id;
     private String receiptId;
     private String productId;
+    private String serviceCode;
     private int amount;
     private int warrantyTime;
     private int total;
@@ -37,6 +40,14 @@ public class ReceiptDetail {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
     }
 
     public int getAmount() {
