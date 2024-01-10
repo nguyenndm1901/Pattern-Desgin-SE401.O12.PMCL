@@ -199,8 +199,6 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         btnNew = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCart = new javax.swing.JTable();
-        buttonColumn = tblCart.getColumnModel().getColumn(tblCart.getColumnCount() - 1);
-        buttonColumn.setCellRenderer(new ButtonRenderer());
         btnRemove = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
         txtTotal = new javax.swing.JTextField();
@@ -297,7 +295,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
+                    java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false
@@ -316,21 +314,6 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         tblCart.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(tblCart);
         tblCart.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tblCart.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = tblCart.rowAtPoint(e.getPoint());
-                int col = tblCart.columnAtPoint(e.getPoint());
-
-                if (col == tblCart.getColumnCount() - 1) {
-                    Object rowData = tblCart.getModel().getValueAt(row, 0);
-                    MongoCollection<Document> collection = cartList();
-                    collection.deleteOne(Filters.eq("code", rowData));
-                    DefaultTableModel model = (DefaultTableModel) tblCart.getModel();
-                    model.removeRow(row);
-                }
-            }
-        });
 
         btnRemove.setText("Reset Cart");
         btnRemove.setEnabled(false);
@@ -533,7 +516,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         ILaptopDecorator laptopWithService = new WarrantyBuyServiceDecorator(laptop, service.getWarranty(), service.getPrice());
         int newPrice = laptopWithService.getPrice();
 
-        Cart cart = new Cart(laptop.getName(), quantity, laptop.getPrice(), service.getCode(), service.getName(), newPrice);
+        Cart cart = new Cart(laptop.getName(), quantity, laptop.getPrice(), service.getCode(), service.getName(), newPrice * quantity);
         MongoCollection<Document> collection = cartList();
         Document document = new Document()
                 .append("name", cart.getName())
@@ -679,7 +662,6 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private javax.swing.JMenu mnLaptop;
     private javax.swing.JMenu mnReceipt;
     private javax.swing.JTable tblCart;
-    private javax.swing.table.TableColumn buttonColumn;
     private javax.swing.JTextField txtCode;
     private javax.swing.JTextField txtCustomerName;
     private javax.swing.JTextField txtPhone;
