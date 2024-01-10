@@ -463,6 +463,11 @@ public class LaptopForm extends javax.swing.JFrame {
         jMenuBar1.add(mnLaptop);
 
         mnReceipt.setText("Receipt");
+        mnReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnReceiptActionPerformed(evt);
+            }
+        });
         jMenuBar1.add(mnReceipt);
 
         setJMenuBar(jMenuBar1);
@@ -705,6 +710,12 @@ public class LaptopForm extends javax.swing.JFrame {
     private void cbOSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbOSActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbOSActionPerformed
+
+    private void mnReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnReceiptActionPerformed
+        CreateReceiptForm receiptForm = new CreateReceiptForm();
+        receiptForm.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_mnReceiptActionPerformed
 
     private void clearState() {
         jPanel1.setEnabled(false);

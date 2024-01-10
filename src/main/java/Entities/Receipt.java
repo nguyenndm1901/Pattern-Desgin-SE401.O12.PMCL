@@ -11,13 +11,13 @@ public class Receipt {
     private String staffId;
     private String purchaseDate;
     private int total;
-    private List<Laptop> laptopList;
+    private List<String> laptopList;
     private String paymentType;
 
     public Receipt() {
     }
 
-    public Receipt(String code, String customerId, String staffId, String purchaseDate, int total, List<Laptop> laptopList, String paymentType) {
+    public Receipt(String code, String customerId, String staffId, String purchaseDate, int total, List<String> laptopList, String paymentType) {
         this.code = code;
         this.customerId = customerId;
         this.staffId = staffId;
@@ -71,11 +71,11 @@ public class Receipt {
         this.total = total;
     }
 
-    public List<Laptop> getLaptopList() {
+    public List<String> getLaptopList() {
         return laptopList;
     }
 
-    public void setLaptopList(List<Laptop> laptopList) {
+    public void setLaptopList(List<String> laptopList) {
         this.laptopList = laptopList;
     }
 

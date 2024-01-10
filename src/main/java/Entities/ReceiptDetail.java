@@ -6,18 +6,19 @@ public class ReceiptDetail {
     private String id;
     private String receiptId;
     private String productId;
-    private String serviceCode;
     private int amount;
+    private String serviceCode;
     private int warrantyTime;
     private int total;
 
     public ReceiptDetail() {
     }
 
-    public ReceiptDetail(String receiptId, String productId, int amount, int warrantyTime, int total) {
+    public ReceiptDetail(String receiptId, String productId, int amount, String serviceCode, int warrantyTime, int total) {
         this.receiptId = receiptId;
         this.productId = productId;
         this.amount = amount;
+        this.serviceCode = serviceCode;
         this.warrantyTime = warrantyTime;
         this.total = total;
     }

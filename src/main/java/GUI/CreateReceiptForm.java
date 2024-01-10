@@ -12,6 +12,7 @@ import Entities.*;
 import Strategy.CardPaymentStrategy;
 import Strategy.CashPaymentStrategy;
 import Strategy.IPaymentStrategy;
+import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -46,7 +47,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private Service service;
     private int cartTotal;
     private String customerId;
-    private List<Laptop> laptopList;
+    private List<String> laptopList = new ArrayList<>();
+
+    private ILaptopDecorator laptopWithService;
+
+    private List<ReceiptDetail> receiptDetails = new ArrayList<>();
 
     public CreateReceiptForm() {
         initComponents();
@@ -346,6 +351,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             }
         });
 
+        txtWarranty.setEditable(false);
         txtWarranty.setEnabled(false);
 
         jLabel14.setText("Warranty:");
@@ -358,6 +364,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         jLabel10.setText("Payment Method:");
 
         mnLaptop.setText("Laptop");
+        mnLaptop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnLaptopActionPerformed(evt);
+            }
+        });
         jMenuBar1.add(mnLaptop);
 
         mnReceipt.setText("Receipt");
@@ -492,7 +503,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                     .addComponent(jLabel12)
                     .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnRemove))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         pack();
@@ -526,23 +537,50 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         if (txtPhone.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter phone number");
         if (Integer.parseInt(txtQuantity.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
         if (cbStaff.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid staff");
-        if (cbLaptop.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid laptop");
+        if (cbLaptop.getSelectedIndex() < 0) {
+            JOptionPane.showMessageDialog(null, "Please choose a valid laptop");
+            return;
+        }
         if (cbService.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid service");
         if (!checkInt(txtQuantity.getText())) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
         if (Integer.parseInt(txtQuantity.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
         int quantity = Integer.parseInt(txtQuantity.getText());
 
-        ILaptopDecorator laptopWithService = new WarrantyBuyServiceDecorator(laptop, service.getWarranty(), service.getPrice());
+        laptop = (Laptop) cbLaptop.getSelectedItem();
+        laptopWithService = new WarrantyBuyServiceDecorator(laptop, service.getWarranty(), service.getPrice());
         int newPrice = laptopWithService.getPrice();
+        int newWarranty = laptopWithService.getWarranty();
 
-        Customer customer = new Customer(setCode("customer"), txtCustomerName.getText(), txtPhone.getText());
-        Document customerDocument = new Document()
-                .append("code", customer.getCode())
-                .append("name", customer.getName())
-                .append("phone", customer.getPhone());
         MongoCollection<Document> customers = Connection.getDatabase().getCollection("customer");
-        customers.replaceOne(Filters.and(Filters.eq("name", customer.getName()), Filters.eq("phone", customer.getPhone())), customerDocument, new UpdateOptions().upsert(true));
-        customerId = customer.getId();
+
+        try {
+            Document findCustomer = customers.find(new Document("name", txtCustomerName.getText()).append("phone", txtPhone.getText())).first();
+
+            if (findCustomer != null) {
+                customerId = findCustomer.getString("code");
+            } else {
+                customerId = setCode("customer");
+                Customer customer = new Customer(customerId, txtCustomerName.getText(), txtPhone.getText());
+
+                Document customerDocument = new Document()
+                        .append("code", customer.getCode())
+                        .append("name", customer.getName())
+                        .append("phone", customer.getPhone());
+
+                customers.replaceOne(
+                        Filters.and(
+                                Filters.eq("name", customer.getName()),
+                                Filters.eq("phone", customer.getPhone())
+                        ),
+                        customerDocument,
+                        new UpdateOptions().upsert(true)
+                );
+            }
+        } catch (MongoException e) {
+            // Handle MongoDB-related exceptions
+            JOptionPane.showMessageDialog(null, e.getMessage()); // Replace with appropriate error handling
+        }
+
 
         Cart cart = new Cart(laptop.getName(), quantity, laptop.getPrice(), service.getCode(), service.getName(), newPrice * quantity);
         Document document = new Document()
@@ -554,7 +592,10 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                 .append("total", cart.getTotal());
 
         collection.insertOne(document);
-        laptopList.add(laptop);
+
+        ReceiptDetail detail = new ReceiptDetail(txtCode.getText(), laptop.getCode(), quantity, service.getCode(), newWarranty, cart.getTotal());
+        receiptDetails.add(detail);
+        laptopList.add(laptop.getCode());
 
 
         initCart();
@@ -565,13 +606,68 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtCustomerName.setEnabled(false);
         txtPhone.setEnabled(false);
         cbStaff.setEnabled(false);
-        cbLaptop.setSelectedIndex(-1);
+        cbLaptop.setSelectedIndex(0);
         txtUnitPrice.setText("");
         cbService.setSelectedIndex(0);
         txtWarranty.setText("");
     }
 
     private void btnCheckoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckoutActionPerformed
+        String code = txtCode.getText();
+        String purchaseDate = txtPurchaseDate.getText();
+
+        String paymentType = "";
+
+        if (Objects.equals(cbPayment.getSelectedItem(), "-- None --")) JOptionPane.showMessageDialog(null, "Please choose a payment method");
+        if (cbPayment.getSelectedItem() == "Cash") {
+            IPaymentStrategy paymentStrategy = new CashPaymentStrategy();
+            paymentType = paymentStrategy.paymentType();
+        }
+        if (cbPayment.getSelectedItem() == "Card") {
+            IPaymentStrategy paymentStrategy = new CardPaymentStrategy();
+            paymentType = paymentStrategy.paymentType();
+        }
+
+        Receipt receipt = new Receipt(code, customerId, staffId, purchaseDate, cartTotal, laptopList, paymentType);
+
+        MongoCollection<Document> receiptList = receiptList();
+        Document document = new Document()
+                .append("code", receipt.getCode())
+                .append("customerId", receipt.getCustomerId())
+                .append("staffId", receipt.getStaffId())
+                .append("purchaseDate", receipt.getPurchaseDate())
+                .append("cartTotal", receipt.getTotal())
+                .append("laptopList", receipt.getLaptopList())
+                .append("paymentType", receipt.getPaymentType());
+        receiptList.insertOne(document);
+
+        MongoCollection<Document> detailsList = receiptDetailList();
+        List<Document> documents = new ArrayList<>();
+        for (ReceiptDetail detail : receiptDetails) {
+            Document detailDocument = new Document()
+                    .append("receiptId", detail.getReceiptId())
+                    .append("productId", detail.getProductId())
+                    .append("amount", detail.getAmount())
+                    .append("serviceCode", detail.getServiceCode())
+                    .append("warrantyTime", detail.getWarrantyTime())
+                    .append("total", detail.getTotal());
+            documents.add(detailDocument);
+        }
+        detailsList.insertMany(documents);
+
+        clearCart();
+        clearForm();
+    }//GEN-LAST:event_btnCheckoutActionPerformed
+
+    private void clearCart() {
+        MongoCollection<Document> collection = cartList();
+        collection.deleteMany(new Document());
+        initCart();
+        laptopList = new ArrayList<>();
+        receiptDetails = new ArrayList<>();
+    }
+
+    private void clearForm() {
         btnNew.setEnabled(true);
         btnAdd.setEnabled(false);
         btnCheckout.setEnabled(false);
@@ -587,41 +683,16 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtWarranty.setEnabled(false);
         tblCart.setEnabled(false);
 
-        String code = txtCode.getText();
-        String purchaseDate = txtPurchaseDate.getText();
-
-        String paymentType = "";
-
-        if (cbPayment.getSelectedItem() == "Cash") {
-            IPaymentStrategy paymentStrategy = new CashPaymentStrategy();
-            paymentType = paymentStrategy.paymentType();
-        }
-        if (cbPayment.getSelectedItem() == "Card") {
-            IPaymentStrategy paymentStrategy = new CardPaymentStrategy();
-            paymentType = paymentStrategy.paymentType();
-        }
-
-        Receipt receipt = new Receipt(code, customerId, staffId, purchaseDate, cartTotal, laptopList, paymentType);
-
-        MongoCollection<Document> collection = receiptList();
-        Document document = new Document()
-                .append("code", receipt.getCode())
-                .append("customerId", receipt.getCustomerId())
-                .append("staffId", receipt.getStaffId())
-                .append("purchaseDate", receipt.getPurchaseDate())
-                .append("cartTotal", receipt.getTotal())
-                .append("laptopList", receipt.getLaptopList())
-                .append("paymentType", receipt.getPaymentType());
-        collection.insertOne(document);
-
-        //ReceiptDetail receiptDetail = new ReceiptDetail(code, laptopId, txtQuantity.getText(), )
-        clearCart();
-    }//GEN-LAST:event_btnCheckoutActionPerformed
-
-    private void clearCart() {
-        MongoCollection<Document> collection = cartList();
-        collection.deleteMany(new Document());
-        initCart();
+        cbStaff.setSelectedIndex(-1);
+        cbLaptop.setSelectedIndex(-1);
+        cbService.setSelectedIndex(0);
+        cbPayment.setSelectedIndex(0);
+        txtCode.setText("");
+        txtPurchaseDate.setText("");
+        txtCustomerName.setText("");
+        txtPhone.setText("");
+        txtUnitPrice.setText("");
+        txtWarranty.setText("");
     }
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
@@ -637,7 +708,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
 
     private void cbLaptopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbLaptopActionPerformed
         Laptop selectedLaptop = (Laptop) cbLaptop.getSelectedItem();
-        laptop = (Laptop) cbLaptop.getSelectedItem();
+        laptop = selectedLaptop;
         laptopId = selectedLaptop.getCode();
         txtUnitPrice.setText(String.valueOf(selectedLaptop.getPrice()));
         txtWarranty.setText(String.valueOf(selectedLaptop.getWarranty()));
@@ -649,6 +720,12 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         staffId = selectedStaff.getCode();
         System.out.println(staffId);
     }//GEN-LAST:event_cbStaffActionPerformed
+
+    private void mnLaptopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnLaptopActionPerformed
+        LaptopForm laptopForm = new LaptopForm();
+        laptopForm.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_mnLaptopActionPerformed
 
     private boolean checkInt(String value) {
         try {
