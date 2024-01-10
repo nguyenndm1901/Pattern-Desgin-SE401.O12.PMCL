@@ -9,12 +9,16 @@ import Database.Connection;
 import Decorator.ILaptopDecorator;
 import Decorator.WarrantyBuyServiceDecorator;
 import Entities.*;
+import Strategy.CardPaymentStrategy;
+import Strategy.CashPaymentStrategy;
+import Strategy.IPaymentStrategy;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 
 import javax.swing.*;
@@ -41,6 +45,8 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private Laptop laptop;
     private Service service;
     private int cartTotal;
+    private String customerId;
+    private List<Laptop> laptopList;
 
     public CreateReceiptForm() {
         initComponents();
@@ -77,8 +83,8 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         return randomCode.toString();
     }
 
-    private boolean checkReceipt(String code) {
-        MongoCollection<Document> collection = receiptList();
+    private boolean checkCode(String code, String collectionName) {
+        MongoCollection<Document> collection = Connection.getDatabase().getCollection(collectionName);
         Document document = new Document("code", code);
         try (MongoCursor<Document> cursor = collection.find(document).iterator()) {
             return cursor.hasNext();
@@ -92,12 +98,12 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtPurchaseDate.setText(strDate);
     }
 
-    private void setCode() {
+    private String setCode(String collectionName) {
         String code;
         do {
             code = randomCode();
-        } while (checkReceipt(code));
-        txtCode.setText(code);
+        } while (checkCode(code, collectionName));
+        return code;
     }
 
     private void initCart() {
@@ -207,6 +213,8 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtWarranty = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
+        cbPayment = new javax.swing.JComboBox<>();
+        jLabel10 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnLaptop = new javax.swing.JMenu();
         mnReceipt = new javax.swing.JMenu();
@@ -295,7 +303,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                    java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false
@@ -344,6 +352,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
 
         jLabel9.setText("months");
 
+        cbPayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-- None --", "Cash", "Card" }));
+        cbPayment.setEnabled(false);
+
+        jLabel10.setText("Payment Method:");
+
         mnLaptop.setText("Laptop");
         jMenuBar1.add(mnLaptop);
 
@@ -368,26 +381,25 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                             .addComponent(jLabel8)
                             .addComponent(jLabel14))
                         .addGap(26, 26, 26)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(46, 46, 46)
                                 .addComponent(jLabel2)
                                 .addGap(18, 18, 18)
-                                .addComponent(txtPurchaseDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(txtPurchaseDate))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(67, 67, 67)
                                 .addComponent(jLabel5)
                                 .addGap(18, 18, 18)
-                                .addComponent(cbStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(cbStaff, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(cbLaptop, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(63, 63, 63)
                                 .addComponent(jLabel7)
                                 .addGap(18, 18, 18)
-                                .addComponent(txtQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txtCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, 397, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtQuantity, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(txtWarranty)
@@ -397,27 +409,29 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                                         .addGap(54, 54, 54)
                                         .addComponent(jLabel13)
                                         .addGap(18, 18, 18)
-                                        .addComponent(cbService, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(cbService, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel9)))))
-                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel9)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel10)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(cbPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtCustomerName))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
                         .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnCheckout, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 11, Short.MAX_VALUE))
+                            .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap())))
+                        .addComponent(btnRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -463,7 +477,9 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtWarranty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel14)
-                            .addComponent(jLabel9)))
+                            .addComponent(jLabel9)
+                            .addComponent(cbPayment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(30, 30, 30)
@@ -492,17 +508,20 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         cbStaff.setEnabled(true);
         cbLaptop.setEnabled(true);
         cbService.setEnabled(true);
+        cbPayment.setEnabled(true);
         txtQuantity.setEnabled(true);
         txtUnitPrice.setEnabled(true);
         txtWarranty.setEnabled(true);
         tblCart.setEnabled(true);
-        setCode();
+        txtCode.setText(setCode("receipt"));
         setPurchaseDate();
 
 
     }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        MongoCollection<Document> collection = cartList();
+        if (collection == null) JOptionPane.showMessageDialog(null, "Please choose at least one laptop");
         if (txtCustomerName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter customer name");
         if (txtPhone.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter phone number");
         if (Integer.parseInt(txtQuantity.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
@@ -516,8 +535,16 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         ILaptopDecorator laptopWithService = new WarrantyBuyServiceDecorator(laptop, service.getWarranty(), service.getPrice());
         int newPrice = laptopWithService.getPrice();
 
+        Customer customer = new Customer(setCode("customer"), txtCustomerName.getText(), txtPhone.getText());
+        Document customerDocument = new Document()
+                .append("code", customer.getCode())
+                .append("name", customer.getName())
+                .append("phone", customer.getPhone());
+        MongoCollection<Document> customers = Connection.getDatabase().getCollection("customer");
+        customers.replaceOne(Filters.and(Filters.eq("name", customer.getName()), Filters.eq("phone", customer.getPhone())), customerDocument, new UpdateOptions().upsert(true));
+        customerId = customer.getId();
+
         Cart cart = new Cart(laptop.getName(), quantity, laptop.getPrice(), service.getCode(), service.getName(), newPrice * quantity);
-        MongoCollection<Document> collection = cartList();
         Document document = new Document()
                 .append("name", cart.getName())
                 .append("quantity", cart.getQuantity())
@@ -527,6 +554,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
                 .append("total", cart.getTotal());
 
         collection.insertOne(document);
+        laptopList.add(laptop);
 
 
         initCart();
@@ -553,11 +581,40 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         cbStaff.setEnabled(false);
         cbLaptop.setEnabled(false);
         cbService.setEnabled(false);
+        cbPayment.setEnabled(false);
         txtQuantity.setEnabled(false);
         txtUnitPrice.setEnabled(false);
         txtWarranty.setEnabled(false);
         tblCart.setEnabled(false);
 
+        String code = txtCode.getText();
+        String purchaseDate = txtPurchaseDate.getText();
+
+        String paymentType = "";
+
+        if (cbPayment.getSelectedItem() == "Cash") {
+            IPaymentStrategy paymentStrategy = new CashPaymentStrategy();
+            paymentType = paymentStrategy.paymentType();
+        }
+        if (cbPayment.getSelectedItem() == "Card") {
+            IPaymentStrategy paymentStrategy = new CardPaymentStrategy();
+            paymentType = paymentStrategy.paymentType();
+        }
+
+        Receipt receipt = new Receipt(code, customerId, staffId, purchaseDate, cartTotal, laptopList, paymentType);
+
+        MongoCollection<Document> collection = receiptList();
+        Document document = new Document()
+                .append("code", receipt.getCode())
+                .append("customerId", receipt.getCustomerId())
+                .append("staffId", receipt.getStaffId())
+                .append("purchaseDate", receipt.getPurchaseDate())
+                .append("cartTotal", receipt.getTotal())
+                .append("laptopList", receipt.getLaptopList())
+                .append("paymentType", receipt.getPaymentType());
+        collection.insertOne(document);
+
+        //ReceiptDetail receiptDetail = new ReceiptDetail(code, laptopId, txtQuantity.getText(), )
         clearCart();
     }//GEN-LAST:event_btnCheckoutActionPerformed
 
@@ -643,9 +700,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnRemove;
     private javax.swing.JComboBox<Laptop> cbLaptop;
+    private javax.swing.JComboBox<String> cbPayment;
     private javax.swing.JComboBox<Service> cbService;
     private javax.swing.JComboBox<Staff> cbStaff;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
