@@ -4,14 +4,14 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="menuReceipt">
+        <Menu class="javax.swing.JMenu" name="mnLaptop">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Receipt"/>
+            <Property name="text" type="java.lang.String" value="Laptop"/>
           </Properties>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="menuStatistic">
+        <Menu class="javax.swing.JMenu" name="mnReceipt">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Statistic"/>
+            <Property name="text" type="java.lang.String" value="Receipt"/>
           </Properties>
         </Menu>
       </SubComponents>
@@ -19,6 +19,7 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="title" type="java.lang.String" value="Laptop Management"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="jMenuBar1"/>
@@ -96,7 +97,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" pref="413" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="414" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>

@@ -4,11 +4,13 @@ public class Service {
     private String id;
     private String code;
     private String name;
+    private int warranty;
     private int price;
 
-    public Service(String code, String name, int price) {
+    public Service(String code, String name, int warranty, int price) {
         this.code = code;
         this.name = name;
+        this.warranty = warranty;
         this.price = price;
     }
 
@@ -29,6 +31,14 @@ public class Service {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getWarranty() {
+        return warranty;
+    }
+
+    public void setWarranty(int warranty) {
+        this.warranty = warranty;
     }
 
     public int getPrice() {

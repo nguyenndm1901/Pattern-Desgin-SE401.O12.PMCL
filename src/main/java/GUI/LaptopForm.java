@@ -220,10 +220,11 @@ public class LaptopForm extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         txtWarranty = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
-        menuReceipt = new javax.swing.JMenu();
-        menuStatistic = new javax.swing.JMenu();
+        mnLaptop = new javax.swing.JMenu();
+        mnReceipt = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Laptop Management");
 
         tblLaptop.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -458,11 +459,11 @@ public class LaptopForm extends javax.swing.JFrame {
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        menuReceipt.setText("Receipt");
-        jMenuBar1.add(menuReceipt);
+        mnLaptop.setText("Laptop");
+        jMenuBar1.add(mnLaptop);
 
-        menuStatistic.setText("Statistic");
-        jMenuBar1.add(menuStatistic);
+        mnReceipt.setText("Receipt");
+        jMenuBar1.add(mnReceipt);
 
         setJMenuBar(jMenuBar1);
 
@@ -514,7 +515,7 @@ public class LaptopForm extends javax.swing.JFrame {
                             .addComponent(btnDelete))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -602,15 +603,24 @@ public class LaptopForm extends javax.swing.JFrame {
 
     private void btnAddOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddOKActionPerformed
         String code = txtCode.getText();
+        if (txtName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter laptop name");
         String name = txtName.getText();
         LaptopOS os = LaptopOS.valueOf(Objects.requireNonNull(cbOS.getSelectedItem()).toString());
+        if (txtName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter laptop name");
         String brand = txtBrand.getText();
+        if (txtName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter laptop name");
         String processor = Objects.requireNonNull(cbProcessor.getSelectedItem()).toString();
+        if (txtName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter laptop name");
         if (!txtMemory.getText().contains("GB")) txtMemory.setText(txtMemory.getText().trim() + "GB");
         String memory = txtMemory.getText();
+        if (txtName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter laptop name");
         if (!txtStorage.getText().contains("GB")) txtStorage.setText(txtStorage.getText().trim() + "GB");
         String storage = txtStorage.getText();
+        if (!checkInt(txtWarranty.getText())) JOptionPane.showMessageDialog(null, "Please enter valid warranty");
+        if (Integer.parseInt(txtWarranty.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid warranty");
         int warranty = Integer.parseInt(txtWarranty.getText());
+        if (!checkInt(txtPrice.getText())) JOptionPane.showMessageDialog(null, "Please enter valid price");
+        if (Integer.parseInt(txtPrice.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid price");
         int price = Integer.parseInt(txtPrice.getText());
 
         LaptopBuilder laptopBuilder = LaptopFactory.createLaptop(os);
@@ -724,6 +734,15 @@ public class LaptopForm extends javax.swing.JFrame {
         btnDelete.setEnabled(true);
     }
 
+    private boolean checkInt(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -783,8 +802,8 @@ public class LaptopForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblSearch;
-    private javax.swing.JMenu menuReceipt;
-    private javax.swing.JMenu menuStatistic;
+    private javax.swing.JMenu mnLaptop;
+    private javax.swing.JMenu mnReceipt;
     private javax.swing.JTable tblLaptop;
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCode;

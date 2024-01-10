@@ -6,17 +6,21 @@ package GUI;
  */
 
 import Database.Connection;
-import Entities.Laptop;
-import Entities.Service;
-import Entities.Staff;
-import Entities.Temp;
+import Decorator.ILaptopDecorator;
+import Decorator.WarrantyBuyServiceDecorator;
+import Entities.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,6 +34,14 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     /**
      * Creates new form CreateReceiptForm
      */
+
+    private String staffId;
+    private String laptopId;
+    private String serviceId;
+    private Laptop laptop;
+    private Service service;
+    private int cartTotal;
+
     public CreateReceiptForm() {
         initComponents();
         initCBService();
@@ -88,6 +100,29 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtCode.setText(code);
     }
 
+    private void initCart() {
+        MongoCollection<Document> collection = cartList();
+        DefaultTableModel model = (DefaultTableModel) tblCart.getModel();
+        model.setRowCount(0);
+        FindIterable<Document> documents = collection.find();
+        for (Document document : documents) {
+            Object[] row = {
+                    document.getString("name"),
+                    document.getInteger("quantity"),
+                    document.getInteger("unitPrice"),
+                    document.getString("service"),
+                    document.getInteger("total")
+            };
+            model.addRow(row);
+        }
+        Document result = collection.aggregate(Arrays.asList(
+                Aggregates.group(null, Accumulators.sum("total", "$total"))
+        )).first();
+        if (result != null) cartTotal = result.getInteger("total");
+        else cartTotal = 0;
+        txtTotal.setText(String.valueOf(cartTotal));
+    }
+
     private void initCBService() {
         MongoCollection<Document> collection = Connection.getDatabase().getCollection("service");
         FindIterable<Document> documents = collection.find();
@@ -95,6 +130,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
             Service service = new Service(
                     document.get("code").toString(),
                     document.get("name").toString(),
+                    Integer.parseInt(document.get("warranty").toString()),
                     Integer.parseInt(document.get("price").toString())
                     );
             cbService.addItem(service);
@@ -163,6 +199,8 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         btnNew = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCart = new javax.swing.JTable();
+        buttonColumn = tblCart.getColumnModel().getColumn(tblCart.getColumnCount() - 1);
+        buttonColumn.setCellRenderer(new ButtonRenderer());
         btnRemove = new javax.swing.JButton();
         jLabel12 = new javax.swing.JLabel();
         txtTotal = new javax.swing.JTextField();
@@ -172,10 +210,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         jLabel14 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenu2 = new javax.swing.JMenu();
+        mnLaptop = new javax.swing.JMenu();
+        mnReceipt = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Create Receipt");
 
         jLabel1.setText("Code:");
 
@@ -248,20 +287,20 @@ public class CreateReceiptForm extends javax.swing.JFrame {
 
         tblCart.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Product", "Quantity", "Unit Price", "Unit", "Warranty", "Total"
+                "Product", "Quantity", "Unit Price", "Service", "Total"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -277,8 +316,23 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         tblCart.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(tblCart);
         tblCart.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblCart.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tblCart.rowAtPoint(e.getPoint());
+                int col = tblCart.columnAtPoint(e.getPoint());
 
-        btnRemove.setText("Remove from Cart");
+                if (col == tblCart.getColumnCount() - 1) {
+                    Object rowData = tblCart.getModel().getValueAt(row, 0);
+                    MongoCollection<Document> collection = cartList();
+                    collection.deleteOne(Filters.eq("code", rowData));
+                    DefaultTableModel model = (DefaultTableModel) tblCart.getModel();
+                    model.removeRow(row);
+                }
+            }
+        });
+
+        btnRemove.setText("Reset Cart");
         btnRemove.setEnabled(false);
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -307,11 +361,11 @@ public class CreateReceiptForm extends javax.swing.JFrame {
 
         jLabel9.setText("months");
 
-        jMenu1.setText("Laptop");
-        jMenuBar1.add(jMenu1);
+        mnLaptop.setText("Laptop");
+        jMenuBar1.add(mnLaptop);
 
-        jMenu2.setText("Statistic");
-        jMenuBar1.add(jMenu2);
+        mnReceipt.setText("Receipt");
+        jMenuBar1.add(mnReceipt);
 
         setJMenuBar(jMenuBar1);
 
@@ -448,6 +502,7 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
         btnNew.setEnabled(false);
         btnAdd.setEnabled(true);
+        btnRemove.setEnabled(true);
         btnCheckout.setEnabled(true);
         txtCustomerName.setEnabled(true);
         txtPhone.setEnabled(true);
@@ -465,13 +520,51 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
+        if (txtCustomerName.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter customer name");
+        if (txtPhone.getText().trim().isEmpty()) JOptionPane.showMessageDialog(null, "Please enter phone number");
+        if (Integer.parseInt(txtQuantity.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
+        if (cbStaff.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid staff");
+        if (cbLaptop.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid laptop");
+        if (cbService.getSelectedIndex() < 0) JOptionPane.showMessageDialog(null, "Please choose a valid service");
+        if (!checkInt(txtQuantity.getText())) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
+        if (Integer.parseInt(txtQuantity.getText()) < 1) JOptionPane.showMessageDialog(null, "Please enter valid quantity");
+        int quantity = Integer.parseInt(txtQuantity.getText());
+
+        ILaptopDecorator laptopWithService = new WarrantyBuyServiceDecorator(laptop, service.getWarranty(), service.getPrice());
+        int newPrice = laptopWithService.getPrice();
+
+        Cart cart = new Cart(laptop.getName(), quantity, laptop.getPrice(), service.getCode(), service.getName(), newPrice);
+        MongoCollection<Document> collection = cartList();
+        Document document = new Document()
+                .append("name", cart.getName())
+                .append("quantity", cart.getQuantity())
+                .append("unitPrice", cart.getUnitPrice())
+                .append("serviceId", cart.getServiceId())
+                .append("service", cart.getService())
+                .append("total", cart.getTotal());
+
+        collection.insertOne(document);
+
+
+        initCart();
+        clearState();
     }//GEN-LAST:event_btnAddActionPerformed
+
+    private void clearState() {
+        txtCustomerName.setEnabled(false);
+        txtPhone.setEnabled(false);
+        cbStaff.setEnabled(false);
+        cbLaptop.setSelectedIndex(-1);
+        txtUnitPrice.setText("");
+        cbService.setSelectedIndex(0);
+        txtWarranty.setText("");
+    }
 
     private void btnCheckoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckoutActionPerformed
         btnNew.setEnabled(true);
         btnAdd.setEnabled(false);
         btnCheckout.setEnabled(false);
+        btnRemove.setEnabled(false);
         txtCustomerName.setEnabled(false);
         txtPhone.setEnabled(false);
         cbStaff.setEnabled(false);
@@ -481,34 +574,50 @@ public class CreateReceiptForm extends javax.swing.JFrame {
         txtUnitPrice.setEnabled(false);
         txtWarranty.setEnabled(false);
         tblCart.setEnabled(false);
+
+        clearCart();
     }//GEN-LAST:event_btnCheckoutActionPerformed
 
+    private void clearCart() {
+        MongoCollection<Document> collection = cartList();
+        collection.deleteMany(new Document());
+        initCart();
+    }
+
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
-        // TODO add your handling code here:
+        clearCart();
     }//GEN-LAST:event_btnRemoveActionPerformed
 
     private void cbServiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbServiceActionPerformed
         Service selectedService = (Service) cbService.getSelectedItem();
-        String name = selectedService.getName();
-        String code = selectedService.getCode();
-        System.out.println(code);
+        service = (Service) cbService.getSelectedItem();
+        serviceId = selectedService.getCode();
+        System.out.println(serviceId);
     }//GEN-LAST:event_cbServiceActionPerformed
 
     private void cbLaptopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbLaptopActionPerformed
         Laptop selectedLaptop = (Laptop) cbLaptop.getSelectedItem();
-        String name = selectedLaptop.getName();
-        String code = selectedLaptop.getCode();
+        laptop = (Laptop) cbLaptop.getSelectedItem();
+        laptopId = selectedLaptop.getCode();
         txtUnitPrice.setText(String.valueOf(selectedLaptop.getPrice()));
         txtWarranty.setText(String.valueOf(selectedLaptop.getWarranty()));
-        System.out.println(code);
+        System.out.println(laptopId);
     }//GEN-LAST:event_cbLaptopActionPerformed
 
     private void cbStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbStaffActionPerformed
         Staff selectedStaff = (Staff) cbStaff.getSelectedItem();
-        String name = selectedStaff.getName();
-        String code = selectedStaff.getCode();
-        System.out.println(code);
+        staffId = selectedStaff.getCode();
+        System.out.println(staffId);
     }//GEN-LAST:event_cbStaffActionPerformed
+
+    private boolean checkInt(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -565,11 +674,12 @@ public class CreateReceiptForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JMenu mnLaptop;
+    private javax.swing.JMenu mnReceipt;
     private javax.swing.JTable tblCart;
+    private javax.swing.table.TableColumn buttonColumn;
     private javax.swing.JTextField txtCode;
     private javax.swing.JTextField txtCustomerName;
     private javax.swing.JTextField txtPhone;

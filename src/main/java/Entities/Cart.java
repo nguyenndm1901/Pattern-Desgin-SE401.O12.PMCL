@@ -3,19 +3,21 @@ package Entities;
 public class Cart {
     private String id;
     private String name;
+    private int quantity;
     private int unitPrice;
-    private String unit;
-    private int warranty;
+    private String serviceId;
+    private String service;
     private int total;
 
     public Cart() {
     }
 
-    public Cart(String name, int unitPrice, String unit, int warranty, int total) {
+    public Cart(String name, int quantity, int unitPrice, String serviceId, String service, int total) {
         this.name = name;
+        this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.unit = unit;
-        this.warranty = warranty;
+        this.serviceId = serviceId;
+        this.service = service;
         this.total = total;
     }
 
@@ -35,20 +37,28 @@ public class Cart {
         this.unitPrice = unitPrice;
     }
 
-    public String getUnit() {
-        return unit;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
-    public int getWarranty() {
-        return warranty;
+    public String getServiceId() {
+        return serviceId;
     }
 
-    public void setWarranty(int warranty) {
-        this.warranty = warranty;
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     public int getTotal() {
